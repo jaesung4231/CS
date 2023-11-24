@@ -43,7 +43,7 @@
 프로그램을 메모리 상에서 실행중인 작업의 단위<br>
 각각 독립된 메모리 영역을 할당받는다.
 
-<img src='.\images\process_state.png' width=400 align=center>
+<img src='.\images\process_state.png' width=500 align=center>
 
 - 프로세스 상태
   > - **new**: 프로세스가 생성 중이다
@@ -69,6 +69,43 @@ process context switching이 발생할 경우 processor는 thread의 context뿐�
 멀티 스레드는 멀티 프로세스보다 적은 메모리 공간을 차지하고 Context Switching이 빠른 장점이 있지만, 동기화 문제와 하나의 스레드 장애로 전체 스레드가 종료될 위험을 갖고 있다.<br>
 
 멀티 프로세스는 하나의 프로세스가 죽더라도 다른 프로세스에 영향을 주지 않아 안정성이 높지만, 멀티 스레드보다 많은 메모리공간과 CPU 시간을 차지하는 단점이 있다.
+
+### 임계 구역(Critical Section)
+
+여러 프로세스가 데이터를 공유하며 수행될 때, 각 프로세스에서 공유 데이터를 접근하는 프로그램 코드 부분
+
+### 경쟁 상태(Race Condition)
+
+공유 자원에 대해 여러 프로세스가 동시에 접근할 때, 결과값에 영향을 줄 수 있는 상태
+
+**해결법:** crictical section에 mutual exclusion을 제공. 공유 자원은 하나의 스레드나 프로세스만 접근할 수 있게 한다.
+
+### Lock의 요구사항
+
+- **Correctness(정확성)**
+
+1.  Mutual exclusion: 같은 시간에 하나의 스레드만이 Critical Section에 접근할 수 있다.
+2.  Progess: 여러 스레드가 동시에 Critical Section에 접근하려고 할때
+3.  Bounded waiting: starvation-free, 결국 모든 스레드가 Critical Section에 접근할 수 있어야 한다.
+
+- **Fairness**<br>
+  모든 스레드는 공평하게 lock의 기회를 받아야 한다.
+
+- **Performance**<br>
+  기본적인 성능이 보장되어야 한다.
+
+### Lock의 종류
+
+- **Mutex Lock(Binary semaphore)**<br>
+  하나의 자원에는 하나의 프로세스나 스레드만 할당 받을 수 있다. 동시에 접근하지 못하게 Lock를 걸어둠
+
+- **Spin Lock(Mutex Lock의 Busy-wait 제공)**<br>
+  다른 스레드가 Crictical section에 lock을 점유한 상황에서 lock을 반환하기까지 계속 loop를 돌며 확인하고 기다리는 것.<br>
+
+  > Mutex의 경우에는 다른 스레드가 lock을 점유한 경우에 sleep에 빠짐. 다른 스레드의 작업이 끝나도 lock을 반환하면 awake되면서 lock획득을 재시도
+
+- **Semaphore(counting semaphore)**<br>
+  가용한 개수를 가진 자원에 대한 접근을 허용
 
 ### 데드락(DeadLock)
 
@@ -150,3 +187,91 @@ process context switching이 발생할 경우 processor는 thread의 context뿐�
 > Ex)<br>
 > 주기적으로 일정 시간마다 호출<br>
 > 자원을 요청했는데 즉시 할당되지 못하는 시점에 호출
+
+#### 교착 상태 복구
+
+교착 상태가 발생했다면 교착 상태를 일으킨 프로세스를 종료하거나, 할당된 자원을 해제함으로써 복구를 한다.
+
+1. **프로세스 종료**<br>
+
+- 교착 상태의 프로세스를 모두 중지
+- 교착 상태가 제거될 떄까지 한 프로세스씩 중지
+
+2. **자원 선점**<br>
+
+- 희생자 선택: 최소의 피해를 줄 수 있는 프로세스 선택
+- 롤백: 선점된 프로세스를 문제없던 이전 상태로 롤백
+
+3. **기아 상태**<br>
+
+- 한 프로세스가 계속 선점되어 기아상태가 되는 것을 방지 ex) 우선순위 사용
+
+### 컴퓨터의 주소
+
+- **물리적 주소(Physical Address)**<br>
+  메모리 상의 물리적인 주소
+
+- **논리적 주소(Logical Address or Virtual Address)**<br>
+  논리 주소는 CPU에 의해 프로그램이 실행되고 있을 때 만들어진다.<br>
+  **MMU(Memory-Management Unit)** 라는 하드웨어 장치는 논리 주소와 대응되는 물리 주소를 연결한다.
+
+### 가상 메모리(Virtual Memory)
+
+가상메모리는 프로세스들에게 각각의 비어 있는 메모리 영역을 부여한다. 메모리 영역은 처음부터 비어 있는 상태다. 프로세스의 가상 메모리 접근은 결국 물리 메모리로의 접근으로 이어진다.
+
+### Swapping
+
+메모리 관리를 위해 사용되는 기법.
+
+1. 일부 프로세스를 메모리에서 디스크로 보내고(swap-out), 시간이 흘러 메모리에 여유가 생기면 다시 적재(swap-in)한다.
+2. 중기 스케줄러는 스와퍼(Swapper)을 통해 프로세스들이 CPU경쟁이 심해지는 것을 방지하는 역할을 한다.
+
+### 메모리 관리(Partition/Page/Segment)
+
+- **연속적 할당(Contiguous allocation)**<br>
+  프로세스를 분리되지 않은 하나의 덩어리로 실행
+
+  - **Fixed Partition**<br>
+    메모리를 미리 분할해 놓고, 하나의 파티션에 한 프로그램만 할당하는 방식
+
+    - **균등 고정분할 방식(equal-size partitioning)**: 모든 파티션을 같은 크기로 분할하는 방식
+
+    - **불균등 고정분할 방식(unequal-size partitioning)**: 메모리 상황을 고려해서, 필요한만큼 파티션을 잡고 분할해준다. 파티션을 필요한 크기와 정확히 동일하게 잡기 때문에 내부 단편화는 발생하지 않는다
+
+  - **Dynamic partitioning**<br>
+    요청이 왔을 때의 메모리 상황을 고려해서, 필요한만큼 파티션을 잡고 분할해준다.
+
+  <p align="center"><img src='.\images\contiguous.png' align="center" width=500><p>
+
+- **Buddy System**<br>
+  기본크기인 블럭(block) 단위로 미리 분할해두고, 프로세스의 요청이 있으면 요청한 크기에 맞게 동적으로 블럭을 분할해서 할당하는 방식이다.
+
+1. 메인 메모리는 항상 2^N로 할당한다.
+2. 사용할 수 있는 가장 큰 메모리로부터 시작해서 Binary로 절반씩 쪼개나면서 아래 조건을 만족시키는 공간을 찾는다.
+3. 만약 프로세스 메모리 크기가 K라고 하면, 2^(U-1) < K < 2^U 만큼의 공간에 프로세스를 할당한다.<br> ex) 프로세스 크기가 1000B이면, 512B < 1000B < 1024B이기 때문에 1024B 사이즈의 메모리에 할당하는 것이다.
+4. 프로세스가 종료되고, 만약 같은 Parent를 갖는 Buddy 공간이 비어있다면 Merge한다.
+<p align="center"><img src='.\images\buddy-system.png' align="center" width=500><p>
+
+- **불연속적 할당(Non-contiguous allocation)**<br>
+
+  - **페이징**<br>
+    한 프로그램을 여러 단위로 나누어 분산 적재하는 방법이다.<br>
+    page: 프로세스의 조각<br>
+    frame: 메인 메모리의 조간
+
+    내부 단편화(Internal fragmentation)이 발생할 수 있다.
+
+    **장점:** 내부 단편화(Internal fragmentation)이 발생하지 않는다.<br>
+
+    **단점:** 외부 단편화(External fragmentation)이 발생한다.
+
+<p align="center"><img src='.\images\paging.png' align="center" width=500><p>
+
+- **Segmentation**<br>
+  page는 고정 길이였다면 segment는 논리단위로 프로그램을 나눈다. 나누는 기준은 OS별로 상이하다.
+
+  segmentation table이 필요하며, 각 segment는 시작 주소와 길이를 저장한다.
+
+  **장점:** 내부 단편화(Internal fragmentation)이 발생하지 않는다.<br>
+
+  **단점:** 외부 단편화(External fragmentation)이 발생한다.
