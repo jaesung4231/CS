@@ -236,7 +236,7 @@ process context switching이 발생할 경우 processor는 thread의 context뿐�
 
     - **균등 고정분할 방식(equal-size partitioning)**: 모든 파티션을 같은 크기로 분할하는 방식
 
-    - **불균등 고정분할 방식(unequal-size partitioning)**: 메모리 상황을 고려해서, 필요한만큼 파티션을 잡고 분할해준다. 파티션을 필요한 크기와 정확히 동일하게 잡기 때문에 내부 단편화는 발생하지 않는다
+    - **불균등 고정분할 방식(unequal-size partitioning)**: 메모리 상황을 고려해서, 필요한만큼 파티션을 잡고 분할해준다. 파티션을 필요한 크기와 정확히 동일하게 잡기 때문에 내부 단편화는 발생하지 않는다.
 
   - **Dynamic partitioning**<br>
     요청이 왔을 때의 메모리 상황을 고려해서, 필요한만큼 파티션을 잡고 분할해준다.
